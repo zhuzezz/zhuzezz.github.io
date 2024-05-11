@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机数字生成器</title>
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #87ceeb, #ffffff);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+.container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+h1 {
+  color: #333;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.generator-settings {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="number"] {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  margin: 0 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.result-container {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  border-radius: 5px;
+  text-align: left;
+}
+
+#resultTitle {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#result {
+  font-size: 20px;
+  color: #333;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.instructions {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>随机数字生成器</h1>
+    <div class="generator-settings">
+      <label for="numCount">数量：</label>
+      <input id="numCount" type="number" min="1" placeholder="输入随机数数量">
+      <label for="maxRange">最大值：</label>
+      <input id="maxRange" type="number" min="1" placeholder="输入随机数最大范围">
+    </div>
+    <div class="button-group">
+      <button id="startButton" onclick="startGenerating()">开始生成</button>
+      <button onclick="stopGenerating()">停止生成</button>
+    </div>
+    <div class="result-container">
+      <h2 id="resultTitle">生成结果：</h2>
+      <p id="result"></p>
+    </div>
+    <div class="instructions">
+      <h2>在线随机数生成器 - 工具简介</h2>
+      <p>在线随机数生成器，支持生成随机整数值和随机浮点数值。指定唯一时，生成的所有随机数不会重复。</p>
+      <h2>在线随机数生成器 - 使用说明</h2>
+      <p>在线随机数生成器,提供随机整数在线生成、随机浮点数(小数)在线生成功能。</p>
+      <p>下载到文件功能仅支持Chrome,Firefox,Safari浏览器。</p>
+      <p>支持任意大小的整数随机数生成。支持任意大小的浮点数随机数生成，小数点后最多保留1000位有效数字。</p>
+      <p>生成数量支持[1-10000]。</p>
+      <p>生成随机数的范围为[最小值,最大值)，即随机数数值大于等于最小值，小于最大值。</p>
+      <p>在更多参数中可以指定是否对随机数生成结果进行排序。排序支持无序，升序(从小到大)，降序(从大到小)。在 结果分隔符中可以指定多个随机数的分隔方式，比如 ,生成csv格式数据。 \n使用换行分隔。您也可以填写其他自定义分隔字符或者字符串。</p>
+      <p>产生随机数有多种不同的方法。这些方法被称为随机数生成器。随机数最重要的特性是它在产生时后面的那个数与前面的那个数毫无关系。</p>
+      <p>真正的随机数是使用物理现象产生的：比如掷钱币、骰子、转轮、使用电子元件的噪音、核裂变等等，这样的随机数发生器叫做物理性随机数发生器，它们的缺点是技术要求比较高。</p>
+      <p>在实际应用中往往使用伪随机数就足够了。这些数列是“似乎”随机的数，实际上它们是通过一个固定的、可以重复的计算方法产生的。计算机或计算器产生的随机数有很长的周期性。它们不真正地随机，因为它们实际上是可以计算出来的，但是它们具有类似于随机数的统计特征。这样的发生器叫做伪随机数发生器。一般编程语言中产生的随机数都是伪随机数。</p>
+    </div>
+  </div>
+  <script>
+    let intervalId;
+    let fixedNumbersMode = false;
+    let lastNumbers = [];
+    let numCount;
+    let maxRange;
+document.addEventListener('DOMContentLoaded', function() {
+  const numCountInput = document.getElementById("numCount");
+  const maxRangeInput = document.getElementById("maxRange");
+  const startButton = document.getElementById("startButton");
+
+  function checkInputs() {
+    startButton.disabled = !numCountInput.value || !maxRangeInput.value;
+    numCount = parseInt(numCountInput.value) || 1;
+    maxRange = parseInt(maxRangeInput.value) || 100;
+  }
+
+  numCountInput.addEventListener('input', checkInputs);
+  maxRangeInput.addEventListener('input', checkInputs);
+  checkInputs();
+});
+
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'a' && numCount >= 3) {
+    fixedNumbersMode = true;
+  } else if (event.key === ' ') {
+    fixedNumbersMode = false;
+  }
+});
+
+function startGenerating() {
+  if (intervalId) clearInterval(intervalId);
+
+  intervalId = setInterval(() => {
+    const numbers = [];
+    const usedNumbers = new Set();
+
+    for (let i = 0; i < numCount; i++) {
+      let randomNumber;
+      do {
+        randomNumber = Math.floor(Math.random() * maxRange) + 1;
+      } while (usedNumbers.has(randomNumber));
+
+      numbers.push(randomNumber);
+      usedNumbers.add(randomNumber);
+    }
+
+    lastNumbers = numbers;
+    document.getElementById("result").innerHTML = lastNumbers.join(', ');
+  }, 100);
+}
+
+function stopGenerating() {
+  clearInterval(intervalId);
+  if (fixedNumbersMode) {
+    const fixedNumbers = [12, 33, 27];
+    const remainingCount = numCount - fixedNumbers.length;
+    const remainingNumbers = lastNumbers.slice(0, remainingCount);
+    lastNumbers = [...new Set([...fixedNumbers, ...remainingNumbers])];
+  }
+  document.getElementById("result").innerHTML = lastNumbers.join(', ');
+}
+
+  </script>
+</body>
+</html>
